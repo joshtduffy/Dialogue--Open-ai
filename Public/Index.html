@@ -1,1 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dialogue Chat</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    #chat { max-width: 500px; margin: auto; }
+    .bubble { padding: 10px; margin: 5px 0; border-radius: 5px; }
+    .user { background: #007bff; color: white; text-align: right; }
+    .bot { background: #e5e5ea; color: black; text-align: left; }
+  </style>
+</head>
+<body>
+  <div id="chat">
+    <div id="messages"></div>
+    <form id="chat-form">
+      <input type="text" id="message" placeholder="Type a message..." required>
+      <button type="submit">Send</button>
+    </form>
+  </div>
 
+  <script>
+    const form = document.getElementById("chat-form");
+    const messages = document.getElementById("messages");
+
+    function addMessage(text, type) {
+      const div = document.createElement("div");
+      div.className = "bubble " + type;
+      div.textContent = text;
+      messages.appendChild(div);
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const input = document.getElementById("message");
+      const text = input.value;
+      addMessage(text, "user");
+      input.value = "";
+
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text })
+      });
+
+      const data = await res.json();
+      addMessage(data.reply || "Error: " + JSON.stringify(data), "bot");
+    });
+  </script>
+</body>
+</html>
